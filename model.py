@@ -203,3 +203,34 @@ class ProjectionLayer(nn.Module):
         return self.proj(x)
     
 
+class Transformer(nn.Module):
+    def __init__(self, encoder: Encoder, decoder: Decoder, src_embed: InputEmbedding, tgt_embed: InputEmbedding, src_pos: PositionalEncoding, tgt_pos: PositionalEncoding, projection_layer: ProjectionLayer) -> None:
+        super().__init__()
+        self.encoder = encoder
+        self.decoder = decoder
+        self.src_embed = src_embed
+        self.tgt_embed = tgt_embed
+        self.src_pos = src_pos
+        self.tgt_pos = tgt_pos
+        self.projection_layer = projection_layer
+
+        def encoder(self, src, src_mask):
+            # (batch, seq_len, d_model)
+            src = self.src_embed(src)
+            src = self.src_pos(src)
+            return self.encoder(src, src_mask)
+        
+        def decode(self, encoder_output: torch.Tensor, src_mask: torch.Tensor, tgt: torch.Tensor, tgt_mask: torch.Tensor):
+            # (batch, seq_len, d_model)
+            tgt = self.tgt_embed(tgt)
+            tgt = self.tgt_pos(tgt)
+            return self.decoder(tgt, encoder_output, src_mask, tgt_mask)
+
+        def projection(self, x):
+            return self.projection_layer(x)
+        
+
+
+def build_transformer(src_vocab_size: int, tgt_vocab_size: int, src_seq_len: int, tgt_seq_len: int, d_model: int=512, N: int=6, h: int=8, dropout: float=0.1, d_ff: int=2048) -> Transformer:
+    # Create the embedding layers
+    
